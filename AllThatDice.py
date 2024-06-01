@@ -7,6 +7,8 @@
 # This is my own work as defined by
 #    the University's Academic Misconduct Policy.
 #
+from __future__ import absolute_import
+
 import sys
 from prettytable import PrettyTable
 
@@ -30,11 +32,11 @@ def check_player(name: str):
     found = False
     if not players and isinstance(name, str):
         players.append(Player(name))
-        print("Welcome ", name + "!\n")
+        print("Welcome", name + "!\n")
     else:
         # Check if name is alredy taken
         for player in players:
-            if player.name.lower() == name.lower():
+            if player.get_name().lower() == name.lower():
                 print("Sorry, the name is already taken!\n")
                 found = True
                 break
@@ -47,8 +49,8 @@ def check_player(name: str):
 # This function prints the leader board
 def print_leader_board():
     table = PrettyTable(['Name', 'Played', 'Won', 'Chips'])
-    list = sorted(players, key=lambda x: x.get_chips, reverse=True)
-    for x in list:
+    players_list = sorted(players, key=lambda x: x.get_chips(), reverse=True)
+    for x in players_list:
         table.add_row([x.get_name(), x.get_games_played(), x.get_games_won(), x.get_chips()])
     print(table)
     print("\n")
@@ -59,67 +61,106 @@ def print_games_menu():
     return input(print("\nWhich games would you like to play?\n",
                        "(o) Odd-orEven\n",
                        "(m) Maxi\n",
-                       "(b) Bunco\n>"))
+                       "(b) Bunco\n",
+                       "(x) Go Back\n"))
+
+
+# This function searches for a player by their name and return their index
+def return_player(name):
+    for x in players:
+        if x.get_name().lower() == name.lower():
+            return x
+    print("Player not found! Try again\n")
+
+
+# This function prints the players menu
+def print_players_menu(game):
+    option = str.lower(game.NAME[0])
+    if option == 'o':
+        msg = "\nWho is playing {}?\n".format(game.NAME)
+    else:
+        msg = "\nHow many players? ( {} - {} )\n".format(game.get_min_players(), game.get_max_players())
+    print(msg)
 
 
 class AllThatDice:
 
-    def start_game(self):
-        print("in")
-
-    def end_game(self):
-        print("in")
-
     def run(self):
-        print("Welcome to All-That-Dice!\nDeveloped by Alan Turing\nCOMP 1048 Object-Oriented Programming\n\n")
+        print("Welcome to All-That-Dice!\nDeveloped by Arthur Cabral\nCOMP 1048 Object-Oriented Programming\n\n")
 
         menu = "".join(["What would you like to do?\n",
                         "(r) register a new player\n",
                         "(s) show the leader board\n",
-                        "(p) play a games\n",
-                        "(q) quit\n>"])
+                        "(p) play a game\n",
+                        "(q) quit\n"])
 
         menu_option = input(menu)
-        while not check_menu_option(menu_option):
-            menu_option = input(menu)
-
-        # Check if valid option
-        if check_menu_option(menu_option):
-            while menu_option != 'q':
-
-                if menu_option == 'r':
-                    name = input(print("What is the name of the new player?\n>"))
-                    check_player(name)
-                elif menu_option == 's':
-                    if not players:
-                        print("There's no players registered yet!\n")
-                    else:
-                        print_leader_board()
-                elif menu_option == 'p':
+        while check_menu_option(menu_option):
+            if menu_option == 'q':
+                print("Thank you for playing All-That-Dice")
+                sys.exit()
+            elif menu_option == 'r':
+                name = input(print("What is the name of the new player?\n"))
+                check_player(name)
+            elif menu_option == 's':
+                if not players:
+                    print("There's no players registered yet!\n")
+                else:
+                    print_leader_board()
+            elif menu_option == 'p':
+                if not players:
+                    print("There are no players registered.\n")
+                else:
                     game = print_games_menu()
-                    while game not in ['o', 'm', 'b']:
+                    while game not in ['o', 'm', 'b', 'x']:
                         print("Invalid option!")
                         game = print_games_menu()
-
+                    # if x, go back to the first menu
+                    if game == 'x':
+                        pass
                     if game == 'o':
-                        
-                        odd = OddOrEven(self)
+                        odd = OddOrEven.OddOrEven()
 
-                        # Check number of players
-                        print("Passou")
-                    # if not odd.check_number_of_players(len(players)):
-                    #    odd.__del__()
-                    # else:
-                    #     """ Play Odd-Or-Even """
+                        # Print menu option
+                        player_name = input(print_players_menu(odd))
+
+                        # Search player
+                        player = return_player(player_name)
+                        while not player:
+                            player = return_player(player_name)
+
+                        # CHeck if player has enough chips to play
+                        if player.get_chips() > 0:
+                            odd.play(player)
+                        else:
+                            print("{} does not have enough chips to play!".format(player.get_name()))
+
                     elif game == 'm':
                         # Check number of players
-                        maxi = Maxi(players)
+                        maxi = Maxi.Maxi(players)
                         if not maxi.check_number_of_players(len(players)):
-                            maxi.__del__()
+                            pass
                         else:
-                            # Play Maxi
-                            maxi.play()
-                    else:
+                            number_of_players = int(input(print_players_menu(maxi)))
+                            while number_of_players < maxi.get_min_players() or number_of_players > maxi.get_max_players() :
+                                print("Invalid number of players. Try again.")
+                                number_of_players = int(input(print_players_menu(maxi)))
+
+                            for i in range(1, number_of_players + 1):
+                                # Search player
+                                player = return_player(input(print(f"What is the name of player #{i}?")))
+                                while not player:
+                                    player = return_player(input(print(f"What is the name of player #{i}?")))
+
+                                # if player not added yet, add to game's playing array
+                                while not maxi.add_player(player):
+                                    print(f"{player.get_name()} is already in the game!\n")
+                                    # Search player
+                                    player = return_player(input(print(f"What is the name of player #{i}?")))
+
+                            maxi.play(maxi.get_playing())
+
+                    elif game == 'b':
                         bunco = Bunco(players)
                         if not bunco.check_number_of_players(len(players)):
                             bunco.__del__()
@@ -127,9 +168,4 @@ class AllThatDice:
                             # Play Bunco
                             bunco.play()
 
-                menu_option = input(print(menu))
-                while not check_menu_option(menu_option):
-                    menu_option = input(print(menu))
-
-            print("Thank you for playing All-That-Dice")
-            sys.exit()
+            menu_option = input(menu)
