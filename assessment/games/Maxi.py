@@ -7,7 +7,6 @@
 # This is my own work as defined by
 #    the University's Academic Misconduct Policy.
 #
-
 from assessment.games.Game import Game
 
 
@@ -23,16 +22,6 @@ def check_winner(results):
     winners = [item for item in results if int(item['result']) == highest_result]
 
     return winners
-
-
-# method that rolls the dice and return the sum of the roll
-def roll_the_dice(dice, strength):
-    total = 0
-    for y in dice:
-        roll = y.roll_dice(strength)
-        total = total + roll
-        print(y.get_dice_faces(roll - 1), end=" ")
-    return total
 
 
 # method that prints the message when there's a draw
@@ -59,7 +48,6 @@ class Maxi(Game):
     def __init__(self, players):
         super().__init__(3, 5, 2)
         self.players = players
-        self.initial_bets = {}
 
     # overriding abstract method
     def play(self, players):
@@ -68,11 +56,16 @@ class Maxi(Game):
         print("Let the game begin!")
         winner = []
         results = []
+        sum_roll = None
         for index, player in enumerate(players):
             print(f"\nIt's {player.get_name()}'s turn.")
             bet = self.bet_msg(player)
             strength = self.strength_msg()
-            sum_roll = roll_the_dice(dice, strength)
+            sum_roll = 0
+            for die in dice:
+                roll = die.roll_dice(strength)
+                print(die.get_dice_faces(roll - 1), end=" ")
+                sum_roll = sum_roll + roll
 
             results.append({
                 "player": player.get_name(),
@@ -89,9 +82,13 @@ class Maxi(Game):
             print_draw_message(winners)
             winners_result = []
             for x in winners:
-                print(f"\nIt's {player.get_name()}'s turn.")
+                print(f"\nIt's {x['player']}'s turn.")
                 strength = self.strength_msg()
-                sum_roll = roll_the_dice(dice, strength)
+                sum_roll = 0
+                for die in dice:
+                    roll = die.roll_dice(strength)
+                    print(die.get_dice_faces(roll - 1), end=" ")
+                    sum_roll = sum_roll + roll
 
                 winners_result.append({
                     "player": x['player'],
@@ -105,16 +102,12 @@ class Maxi(Game):
             no_winner = (len(winners) > 1)
         winner = winners[0]
 
-        print("\nCongratulations, {}! You win!".format(winner['player']), end=" ")
-
         # Add players number of games played and update chips
         for player_results in players:
-            player_results.increase_games_played()
             bet = get_player_bet(player_results.get_name(), results)
             if player_results.get_name() == winner['player']:
-                player_results.increase_games_won()
-                player_results.add_chips(bet)
+                self.congratulations_msg(player_results, bet, True)
             else:
-                player_results.subtract_chips(bet)
+                self.sorry_msg(player_results, bet, False)
 
             print()

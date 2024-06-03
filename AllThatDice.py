@@ -74,7 +74,7 @@ def return_player(name):
 
 
 # This function prints the players menu
-def print_players_menu(game):
+def print_players_menu(game, game_name):
     option = str.lower(game.NAME[0])
     if option == 'o':
         msg = "\nWho is playing {}?\n".format(game.NAME)
@@ -82,6 +82,27 @@ def print_players_menu(game):
         msg = "\nHow many players? ( {} - {} )\n".format(game.get_min_players(), game.get_max_players())
     print(msg)
 
+# This method creates an array of players added to a specific game
+def get_array_of_players(game, game_name):
+    players = []
+    number_of_players = int(input(print_players_menu(game, game_name)))
+    while number_of_players < game.get_min_players() or number_of_players > game.get_max_players():
+        print("Invalid number of players. Try again.")
+        number_of_players = int(input(print_players_menu(game, game_name)))
+
+    for i in range(1, number_of_players + 1):
+        # Search player
+        player = return_player(input(print(f"What is the name of player #{i}?")))
+        while not player:
+            player = return_player(input(print(f"What is the name of player #{i}?")))
+
+        # if player not added yet, add to game's playing array
+        while not game.add_player(player):
+            print(f"{player.get_name()} is already in the game!\n")
+            # Search player
+            player = return_player(input(print(f"What is the name of player #{i}?")))
+        players.append(player)
+    return players
 
 class AllThatDice:
 
@@ -94,7 +115,7 @@ class AllThatDice:
                         "(p) play a game\n",
                         "(q) quit\n"])
 
-        menu_option = input(menu)
+        menu_option = input(menu).lower()
         while check_menu_option(menu_option):
             if menu_option == 'q':
                 print("Thank you for playing All-That-Dice")
@@ -122,7 +143,7 @@ class AllThatDice:
                         odd = OddOrEven.OddOrEven()
 
                         # Print menu option
-                        player_name = input(print_players_menu(odd))
+                        player_name = input(print_players_menu(odd, odd.NAME))
 
                         # Search player
                         player = return_player(player_name)
@@ -141,31 +162,21 @@ class AllThatDice:
                         if not maxi.check_number_of_players(len(players)):
                             pass
                         else:
-                            number_of_players = int(input(print_players_menu(maxi)))
-                            while number_of_players < maxi.get_min_players() or number_of_players > maxi.get_max_players() :
-                                print("Invalid number of players. Try again.")
-                                number_of_players = int(input(print_players_menu(maxi)))
+                            # set players
+                            maxi.set_playing(get_array_of_players(maxi, maxi.NAME))
 
-                            for i in range(1, number_of_players + 1):
-                                # Search player
-                                player = return_player(input(print(f"What is the name of player #{i}?")))
-                                while not player:
-                                    player = return_player(input(print(f"What is the name of player #{i}?")))
-
-                                # if player not added yet, add to game's playing array
-                                while not maxi.add_player(player):
-                                    print(f"{player.get_name()} is already in the game!\n")
-                                    # Search player
-                                    player = return_player(input(print(f"What is the name of player #{i}?")))
-
+                            # play Maxi
                             maxi.play(maxi.get_playing())
 
                     elif game == 'b':
-                        bunco = Bunco(players)
+                        bunco = Bunco.Bunco(players)
                         if not bunco.check_number_of_players(len(players)):
-                            bunco.__del__()
+                            pass
                         else:
-                            # Play Bunco
-                            bunco.play()
+                            # set players
+                            bunco.set_playing(get_array_of_players(bunco, bunco.NAME))
+
+                            #play bunco
+                            bunco.play(bunco.get_playing())
 
             menu_option = input(menu)

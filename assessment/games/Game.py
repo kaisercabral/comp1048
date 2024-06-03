@@ -16,7 +16,7 @@ class Game:
         self.set_min_players(min_players)
         self.set_max_players(max_players)
         self.set_dice(dice)
-        self.set_playing()
+        self.set_playing([])
 
     def set_min_players(self, min_players):
         self._min_players = min_players
@@ -63,22 +63,23 @@ class Game:
             bet = int(input(print("How many chips would you bid? (1 - {})\n".format(player.get_chips()))))
         return bet
 
-    def sorry_msg(self, player, bet):
+    def sorry_msg(self, player, bet, show_message):
         # subtract the chips
         player.subtract_chips(bet)
+        if show_message:
+            print("Sorry, {}! You lose!".format(player.get_name()), end=" ")
 
-        print("Sorry, {}! You lose!".format(player.get_name()))
-
-    def congratulations_msg(self, player, bet):
+    def congratulations_msg(self, player, bet, show_message):
         # Add the chips
         player.add_chips(bet)
 
         # increase games won
         player.increase_games_won()
-        print("Congratulations, {}! You win!".format(player.get_name()))
+        if show_message:
+            print("Congratulations, {}! You win!".format(player.get_name()), end=" ")
 
-    def set_playing(self):
-        self._playing = []
+    def set_playing(self, players):
+        self._playing = players
 
     def get_playing(self):
         return self._playing
@@ -88,7 +89,6 @@ class Game:
             self._playing.append(player)
             return True
         return False
-
 
     def is_player_playing(self, player):
         return self._playing.count(player) > 0

@@ -16,4 +16,4 @@ class Test:
     main.run()
 
 #    dice = Dice()
-#    print(dice.roll_dice(random.randint(1,5)))r
+#    print(dice.roll_dice(random.randint(1,5)))

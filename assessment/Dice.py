@@ -19,7 +19,7 @@ class Dice:
 
     def roll_dice(self, strength: int):
         # Roll the dice according to the strength set (0 - 5)
-        number = random.randint(1, self.sides)
+        number = random.randint(1,self.sides)
         if number + strength == self.sides:
             result = number + strength
         else:

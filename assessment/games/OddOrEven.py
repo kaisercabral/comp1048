@@ -45,6 +45,6 @@ class OddOrEven(Game):
 
                 # check if player won or lost
                 if (roll % 2 == 0 and choice == 'e') or (roll % 2 == 1 and choice == 'o'):
-                    self.congratulations_msg(player, bet)
+                    self.congratulations_msg(player, bet, True)
                 else:
-                    self.sorry_msg(player, bet)
+                    self.sorry_msg(player, bet, True)
